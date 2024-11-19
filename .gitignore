@@ -1,0 +1,41 @@
+# Ambiente virtuale
+new_venv/
+env/
+*.egg-info/
+__pycache__/
+*.pyc
+*.pyo
+
+# File di configurazione e di sistema
+*.env
+*.DS_Store
+.idea/
+.vscode/
+*.log
+
+# File temporanei
+*.tmp
+*.temp
+*.bak
+*.swp
+*.swo
+
+# File creati da Jupyter Notebook
+.ipynb_checkpoints/
+
+# File generati durante l'esecuzione
+coverage/
+*.coverage
+*.db
+*.sqlite3
+
+# Cartelle di build
+build/
+dist/
+*.egg
+*.wheel
+
+# Risorse
+data/
+
+

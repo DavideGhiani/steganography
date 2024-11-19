@@ -28,6 +28,6 @@ for i, el in enumerate(to_evaluate, start=0):
     evaluator = ErrorMetrics(aligned_secret_image, el)
 
     print(f"--- Metrics for Recovered Image {file_names[i]} ---")
-    print(f"SSIM: {evaluator.compute_ssim_new()}")
+    print(f"SSIM: {evaluator.compute_ssim()}")
     print(f"MSE: {evaluator.mse()}")
     print(f"PSNR: {evaluator.psnr()}")

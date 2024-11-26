@@ -1,33 +1,39 @@
-import os.path
-
+from utils.image_processing import field_morphing
+import csv
 from utils.error_metrics import ErrorMetrics
-from utils.image_processing import resize_to_match
 from configuration import settings
-from PIL import Image
 import cv2
 import numpy as np
 
 cover_image = np.array(cv2.imread(settings.cover_path, cv2.IMREAD_UNCHANGED))
 secret_image = np.array(cv2.imread(settings.secret_path, cv2.IMREAD_UNCHANGED))
-recovered_image_1 = np.array(cv2.imread(settings.recovered_path_1, cv2.IMREAD_UNCHANGED))
-recovered_image_2 = np.array(cv2.imread(settings.recovered_path_2, cv2.IMREAD_UNCHANGED))
-recovered_image_3 = np.array(cv2.imread(settings.recovered_path_3, cv2.IMREAD_UNCHANGED))
+encoded_image = np.array(cv2.imread(settings.encoded_path, cv2.IMREAD_UNCHANGED))
+recovered_image = np.array(cv2.imread(settings.recovered_path, cv2.IMREAD_UNCHANGED))
+post_morph_recovered_image = np.array(cv2.imread(settings.post_morph_recovered_path, cv2.IMREAD_UNCHANGED))
 
-to_evaluate = [recovered_image_1, recovered_image_2, recovered_image_3]
-file_names = [os.path.basename(settings.recovered_path_1), os.path.basename(settings.recovered_path_2), os.path.basename(settings.recovered_path_3)]
+# Field morphing sull'immagine codificata:
+encoded_morphed = field_morphing(encoded_image)
 
-print(f"COVER IMAGE SHAPE: {cover_image.shape}")
-print(f"SECRET IMAGE SHAPE: {secret_image.shape}")
-print(f"RECOVERED IMAGE 1 SHAPE: {recovered_image_1.shape}")
-print(f"RECOVERED IMAGE 2 SHAPE: {recovered_image_2.shape}")
-print(f"RECOVERED IMAGE 3 SHAPE: {recovered_image_3.shape}")
+# Lista di confronti e relativi nomi dei file:
+comparisons = [
+    ("Cover vs Encoded", cover_image, encoded_image),
+    ("Secret vs Recovered", secret_image, recovered_image),
+    ("Encoded vs Encoded Morphed", encoded_image, encoded_morphed),
+    ("Secret vs Post-Morph Recovered", secret_image, post_morph_recovered_image)
+]
 
-for i, el in enumerate(to_evaluate, start=0):
-    aligned_secret_image = resize_to_match(secret_image, el)
-    aligned_secret_image = aligned_secret_image
-    evaluator = ErrorMetrics(aligned_secret_image, el)
+output_csv_path = "/Users/davideghiani/Git/steganography/data/metrics_results.csv"
 
-    print(f"--- Metrics for Recovered Image {file_names[i]} ---")
-    print(f"SSIM: {evaluator.compute_ssim()}")
-    print(f"MSE: {evaluator.mse()}")
-    print(f"PSNR: {evaluator.psnr()}")
+with open(output_csv_path, mode='w', newline='') as csv_file:
+    writer = csv.writer(csv_file)
+    writer.writerow(["Comparison", "SSIM", "MSE", "PSNR"])
+
+    for name, img1, img2 in comparisons:
+        evaluator = ErrorMetrics(img1, img2)
+        ssim = evaluator.compute_ssim()
+        mse = evaluator.mse()
+        psnr = evaluator.psnr()
+
+        writer.writerow([name, ssim, mse, psnr])
+
+print(f"Metrics saved to {output_csv_path}")
